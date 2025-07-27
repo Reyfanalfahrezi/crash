@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Crash Game Lengkap</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      transition: background 0.4s, color 0.4s;
+    }
+
+    body.dark {
+      background: #111;
+      color: #fff;
+    }
+
+    body.light {
+      background: #f4f4f4;
+      color: #222;
+    }
+
+    h1 {
+      color: lime;
+      margin-top: 20px;
+    }
+
+    #multiplier {
+      font-size: 60px;
+      margin: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 18px;
+      cursor: pointer;
+      margin: 10px;
+    }
+
+    input {
+      padding: 8px;
+      font-size: 16px;
+      width: 100px;
+      margin-top: 10px;
+    }
+
+    #status {
+      font-size: 20px;
+      margin: 20px;
+    }
+
+    canvas {
+      background: #222;
+      border: 2px solid #0f0;
+      display: block;
+      margin: 20px auto;
+    }
+
+    .theme-toggle {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+  </style>
+</head>
+<body class="dark">
+  <div class="theme-toggle">
+    <button onclick="toggleTheme()">🌙/☀️</button>
+  </div>
+
+  <h1>Crash Game</h1>
+ <div>Saldo: <span id="saldo">1000</span></div>
+  <div>
+    Taruhan: <input type="number" id="bet" value="100" min="1">
+  </div>
+  <div id="multiplier">1.00x</div>
+  <canvas id="graph" width="400" height="200"></canvas>
+  <button onclick="startGame()">Start</button>
+  <button id="cashout" onclick="cashOut()" disabled>Cash Out</button>
+  <div id="status"></div>
+
+  <audio id="tick" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
+  <audio id="crash" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
+  <audio id="cash" src="https://actions.google.com/sounds/v1/money/coins_dropping.ogg"></audio>
+
+  <script>
+    let saldo = 1000;
+    let multiplier = 1.00;
+    let crashed = false;
+    let hasCashedOut = false;
+    let interval;
+    let crashPoint = 0;
+    let ctx = document.getElementById("graph").getContext("2d");
+    let points = [];
+    const saldoEl = document.getElementById("saldo");
+
+    const tickSound = document.getElementById("tick");
+    const crashSound = document.getElementById("crash");
+    const cashSound = document.getElementById("cash");
+
+    function drawGraph() {
+      ctx.clearRect(0, 0, 400, 200);
+      ctx.beginPath();
+      ctx.moveTo(0, 200);
+      points.forEach((point, i) => {
+[7/27, 5:41 PM] ChatGPT: ctx.lineTo(i * 4, 200 - point * 30);
+      });
+      ctx.strokeStyle = "#0f0";
+      ctx.stroke();
+    }
+
+    function startGame() {
+      const bet = parseInt(document.getElementById("bet").value);
+      if (isNaN(bet) || bet <= 0 || bet > saldo) {
+        alert("Taruhan tidak valid atau saldo kurang!");
+        return;
+      }
+
+      saldo -= bet;
+      saldoEl.textContent = saldo;
+
+      multiplier = 1.00;
+      crashPoint = (Math.random() * 4 + 1.5).toFixed(2);
+      crashed = false;
+      hasCashedOut = false;
+      document.getElementById("status").textContent = "";
+      document.getElementById("cashout").disabled = false;
+      points = [];
+      clearInterval(interval);
+
+      interval = setInterval(() => {
+        multiplier += 0.01;
+        points.push(multiplier);
+        drawGraph();
+        document.getElementById("multiplier").textContent = multiplier.toFixed(2) + "x";
+        tickSound.play();
+
+        if (multiplier >= crashPoint) {
+          clearInterval(interval);
+          crashed = true;
+          document.getElementById("multiplier").textContent = "💥 " + multiplier.toFixed(2) + "x";
+          document.getElementById("status").textContent = hasCashedOut ? "Selamat! Untung." : "Kamu Crash!"; document.getElementById("cashout").disabled = true;
+          crashSound.play();
+        }
+      }, 50);
+    }
+
+    function cashOut() {
+      if (!crashed && !hasCashedOut) {
+        const bet = parseInt(document.getElementById("bet").value);
+        clearInterval(interval);
+        hasCashedOut = true;
+        const hasil = Math.floor(bet * multiplier);
+        saldo += hasil;
+        saldoEl.textContent = saldo;
+        document.getElementById("status").textContent = "Kamu Cashout di " + multiplier.toFixed(2) + "x dan menang " + hasil;
+        document.getElementById("cashout").disabled = true;
+        cashSound.play();
+      }
+    }
+
+    function toggleTheme() {
+      const body = document.body;
+      body.classList.toggle("dark");
+      body.classList.toggle("light");
+    }
+  </script>
+</body>
+                  </html>
